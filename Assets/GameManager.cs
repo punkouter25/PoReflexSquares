@@ -13,17 +13,17 @@ public class GameManager : MonoBehaviour
 
     private bool gameIsActive = false;
     private int currentIndex = -1;
-    private List<float> tapTimes = new List<float>();
+    private readonly List<float> tapTimes = new();
     private float squareActivatedTime;
-    private float timeToTap = 2.0f; // Time allowed to tap the square
+    private readonly float timeToTap = 2.0f; // Time allowed to tap the square
     private IEnumerator currentCountdownCoroutine; // To keep track of the countdown coroutine
 
-    void Start()
+    private void Start()
     {
         InitializeGame();
     }
 
-    void InitializeGame()
+    private void InitializeGame()
     {
         gameIsActive = false;
         currentIndex = -1;
@@ -51,12 +51,23 @@ public class GameManager : MonoBehaviour
         ActivateNextSquareWithDelay();
     }
 
-    void ActivateNextSquareWithDelay()
+    private void ActivateNextSquareWithDelay()
     {
         if (currentIndex < squares.Length - 1)
         {
             currentIndex++;
-            StartCoroutine(DelaySquareActivation(squares[currentIndex]));
+            _ = StartCoroutine(DelaySquareActivation(squares[currentIndex]));
+
+            // After activating the square, start the countdown timer
+            if (gameIsActive)
+            {
+                if (currentCountdownCoroutine != null)
+                {
+                    StopCoroutine(currentCountdownCoroutine);
+                }
+                currentCountdownCoroutine = CountdownCoroutine(timeToTap);
+                _ = StartCoroutine(currentCountdownCoroutine);
+            }
         }
         else
         {
@@ -64,7 +75,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator DelaySquareActivation(GameObject square)
+    private IEnumerator DelaySquareActivation(GameObject square)
     {
         float delay = Random.Range(0.5f, 1.5f);
         yield return new WaitForSeconds(delay);
@@ -78,11 +89,11 @@ public class GameManager : MonoBehaviour
                 StopCoroutine(currentCountdownCoroutine);
             }
             currentCountdownCoroutine = CountdownCoroutine(timeToTap);
-            StartCoroutine(currentCountdownCoroutine);
+            _ = StartCoroutine(currentCountdownCoroutine);
         }
     }
 
-    IEnumerator CountdownCoroutine(float countdownTime)
+    private IEnumerator CountdownCoroutine(float countdownTime)
     {
         float timer = countdownTime;
         while (timer > 0)
@@ -90,48 +101,113 @@ public class GameManager : MonoBehaviour
             countdownTimerText.text = $"{timer:F1} s";
             yield return new WaitForSeconds(0.1f);
             timer -= 0.1f;
+
+            // Check if the square was tapped and deactivate the timer if so
+            if (!squares[currentIndex].GetComponent<Square>().IsActive)
+            {
+                yield break; // Exit the coroutine if the square is no longer active
+            }
         }
         countdownTimerText.text = "0.0 s";
+
+        // If the square wasn't tapped in time, end the game
+        if (gameIsActive && squares[currentIndex].GetComponent<Square>().IsActive)
+        {
+            Debug.Log("Time's up! Game over.");
+            EndGame(earlyTap: false, failed: true);
+        }
     }
+
 
     public void SquareTapped(int index)
     {
-        if (!gameIsActive || index != currentIndex) return;
-
-        float reactionTime = (Time.time - squareActivatedTime) * 1000;
-        tapTimes.Add(reactionTime);
-        squares[currentIndex].GetComponent<Square>().ResetSquare(true, reactionTime);
-        if (currentCountdownCoroutine != null)
+        // Verify if the game is active and if the tapped square is the correct one (the one expected to be tapped next).
+        if (gameIsActive)
         {
-            StopCoroutine(currentCountdownCoroutine);
-            countdownTimerText.text = ""; // Optionally clear the countdown text
+            Square tappedSquare = squares[index].GetComponent<Square>();
+
+            // Check if the tapped square was active, and if it's the correct one (currentIndex)
+            if (tappedSquare.IsActive && index == currentIndex)
+            {
+                // The tap is valid. Perform the usual logic for a successful tap.
+                float reactionTime = (Time.time - squareActivatedTime) * 1000;
+                tapTimes.Add(reactionTime);
+                tappedSquare.ResetSquare(true, reactionTime);
+
+                // Stop the countdown coroutine and clear the timer text.
+                if (currentCountdownCoroutine != null)
+                {
+                    StopCoroutine(currentCountdownCoroutine);
+                    countdownTimerText.text = "";
+                }
+
+                // Move to the next square.
+                ActivateNextSquareWithDelay();
+            }
+            else
+            {
+                // If the tapped square was not active or it wasn't the correct square, it's game over.
+                // Whether it was the correct square or not, the game should end since it wasn't active.
+                EndGame(earlyTap: true, failed: false);
+            }
         }
-        ActivateNextSquareWithDelay();
+        else
+        {
+            // If the game is not active, ignore the tap or consider it as an early tap.
+            // You can also use this else block to handle other scenarios if needed.
+        }
     }
 
     void EndGame(bool earlyTap, bool failed)
     {
+        // Stop the game activity.
         gameIsActive = false;
-        gameOverModal.SetActive(true);
-        startButton.gameObject.SetActive(false); // Hide the Start button when Game Over modal is shown
 
-        if (failed)
+        // Show the game over modal.
+        gameOverModal.SetActive(true);
+
+        // Hide the Start button when the Game Over modal is shown.
+        startButton.gameObject.SetActive(false);
+
+        // Determine what text to show based on how the game ended.
+        if (earlyTap)
+        {
+            // Early tap or tap on an inactive square means no score.
+            scoreText.text = "GAME OVER: You tapped too soon!";
+        }
+        else if (failed)
         {
             scoreText.text = "GAME OVER: Time's up!";
         }
         else
         {
+            // Calculate and display the average reaction time if the game ended normally.
             float averageTime = CalculateAverageTime();
             scoreText.text = $"Average Reaction Time: {averageTime:F2} ms";
         }
 
-      //  startButton.gameObject.SetActive(true); // Show start button when game ends
-        countdownTimerText.text = ""; // Clear countdown timer text
+        // Clear the countdown timer text.
+        countdownTimerText.text = "";
+
+        // Optionally stop any ongoing coroutines to make sure there are no residual countdowns running.
+        if (currentCountdownCoroutine != null)
+        {
+            StopCoroutine(currentCountdownCoroutine);
+        }
+
+        // Clear the times list since the game is over.
+        tapTimes.Clear();
     }
 
-    float CalculateAverageTime()
+
+
+    private float CalculateAverageTime()
     {
-        if (tapTimes.Count == 0) return 0f;
+        if (tapTimes.Count == 0)
+        {
+            return 0f;
+        }
+
         float total = 0f;
         foreach (float time in tapTimes)
         {
@@ -139,13 +215,6 @@ public class GameManager : MonoBehaviour
         }
         return total / tapTimes.Count;
     }
-
-    // Uncomment and adjust this method as necessary based on your modal "OK" button setup
-    // public void OnGameOverOKButtonClicked()
-    // {
-    //     gameOverModal.SetActive(false); // Hide the Game Over modal
-    //     InitializeGame(); // Reset the game to its initial state
-    // }
 
     public void ResetGame()
     {
