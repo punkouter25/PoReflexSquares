@@ -1,5 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +14,7 @@ public class GameManager : MonoBehaviour
     public Text scoreText;
     public Button startButton; // Reference to the Start button
     public Text countdownTimerText; // For countdown display
+    public InputField initialsInputField;
 
     private bool gameIsActive = false;
     private int currentIndex = -1;
@@ -17,6 +22,8 @@ public class GameManager : MonoBehaviour
     private float squareActivatedTime;
     private readonly float timeToTap = 2.0f; // Time allowed to tap the square
     private IEnumerator currentCountdownCoroutine; // To keep track of the countdown coroutine
+    private bool validScore = false;
+    private float averageTime;
 
     private void Start()
     {
@@ -77,7 +84,9 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator DelaySquareActivation(GameObject square)
     {
-        float delay = Random.Range(0.5f, 1.5f);
+          float delay = UnityEngine.Random.Range(0.0f, 0.1f);
+        //  float delay = UnityEngine.Random.Range(0.5f, 1.5f);
+
         yield return new WaitForSeconds(delay);
 
         if (gameIsActive)
@@ -160,6 +169,7 @@ public class GameManager : MonoBehaviour
 
     void EndGame(bool earlyTap, bool failed)
     {
+        Debug.Log("EndGame");
         // Stop the game activity.
         gameIsActive = false;
 
@@ -181,8 +191,9 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            validScore = true;
             // Calculate and display the average reaction time if the game ended normally.
-            float averageTime = CalculateAverageTime();
+            averageTime = CalculateAverageTime();
             scoreText.text = $"Average Reaction Time: {averageTime:F2} ms";
         }
 
@@ -220,6 +231,70 @@ public class GameManager : MonoBehaviour
     {
         gameOverModal.SetActive(false);
         startButton.gameObject.SetActive(true);
+        validScore = false;
         InitializeGame(); // Reset and prepare for a new game
+    }
+
+    public void OnSubmitScoreClicked()
+    {
+        _ = SubmitScoreAsync(); // Discard the task
+    }
+
+    public async Task SubmitScoreAsync()
+    {
+        Debug.Log("Submit Score");
+
+        string initials = initialsInputField.text;
+
+        //call http post to save score if it is valid score
+        if (validScore)
+        {
+            Debug.Log("Initials: " + initials + " Score: " + averageTime);
+        }
+        else
+        {
+            Debug.Log("Invalid score. No Score saved.");
+        }
+
+        var highScore = new HighScore
+        {
+            Name = initials,
+            Score = Convert.ToDouble(averageTime),
+            DateCreated = DateTime.UtcNow,
+            AppName = "PoReflexSquares"
+            // Set other properties as needed
+        };
+
+        await PostHighScoreAsync(highScore, "https://poshared.azurewebsites.net/");
+
+        gameOverModal.SetActive(false);
+        ResetGame();
+    }
+
+    public async Task PostHighScoreAsync(HighScore highScore, string apiUrl)
+    {
+        try
+        {
+            using (var client = new HttpClient())
+            {
+                string json = JsonUtility.ToJson(highScore);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync($"{apiUrl}/highscores", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Debug.Log("High score posted successfully.");
+                }
+                else
+                {
+                    Debug.Log($"Failed to post high score. Status code: {response.StatusCode}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Log($"An error occurred while posting the high score: {ex.Message}");
+        }
     }
 }
