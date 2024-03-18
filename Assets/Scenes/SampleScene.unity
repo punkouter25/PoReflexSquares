@@ -286,7 +286,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &239641937
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,7 +444,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &290844361
 GameObject:
   m_ObjectHideFlags: 0
@@ -772,7 +772,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &522218495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1608,7 +1608,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &869522988
 GameObject:
   m_ObjectHideFlags: 0
@@ -1687,7 +1687,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &921185901
 GameObject:
   m_ObjectHideFlags: 0
@@ -2020,7 +2020,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &1092700275
 GameObject:
   m_ObjectHideFlags: 0
@@ -2406,7 +2406,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &1338353698
 GameObject:
   m_ObjectHideFlags: 0
@@ -2722,7 +2722,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &1509460898
 GameObject:
   m_ObjectHideFlags: 0
@@ -2774,7 +2774,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!222 &1509460900
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3563,7 +3563,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ABC 1.234
+  m_Text: ---
 --- !u!1 &1720285969
 GameObject:
   m_ObjectHideFlags: 0
