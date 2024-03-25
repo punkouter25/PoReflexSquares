@@ -84,8 +84,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator DelaySquareActivation(GameObject square)
     {
-          float delay = UnityEngine.Random.Range(0.0f, 0.1f);
-        //  float delay = UnityEngine.Random.Range(0.5f, 1.5f);
+         // float delay = UnityEngine.Random.Range(0.0f, 0.1f);
+          float delay = UnityEngine.Random.Range(0.5f, 1.5f);
 
         yield return new WaitForSeconds(delay);
 
@@ -184,10 +184,12 @@ public class GameManager : MonoBehaviour
         {
             // Early tap or tap on an inactive square means no score.
             scoreText.text = "GAME OVER: You tapped too soon!";
+            initialsInputField.gameObject.SetActive(false); // Hide the input field on early tap
         }
         else if (failed)
         {
             scoreText.text = "GAME OVER: Time's up!";
+            initialsInputField.gameObject.SetActive(false); // Show the input field for other failures
         }
         else
         {
@@ -195,6 +197,7 @@ public class GameManager : MonoBehaviour
             // Calculate and display the average reaction time if the game ended normally.
             averageTime = CalculateAverageTime();
             scoreText.text = $"Average Reaction Time: {averageTime:F2} ms";
+            initialsInputField.gameObject.SetActive(true); // Ensure the input field is visible for valid game overs
         }
 
         // Clear the countdown timer text.
@@ -250,22 +253,22 @@ public class GameManager : MonoBehaviour
         if (validScore)
         {
             Debug.Log("Initials: " + initials + " Score: " + averageTime);
+
+            var highScore = new HighScore
+            {
+                Name = initials,
+                Score = Convert.ToDouble(averageTime),
+                DateCreated = DateTime.UtcNow,
+                AppName = "PoReflexSquares"
+                // Set other properties as needed
+            };
+
+            await PostHighScoreAsync(highScore, "https://poshared.azurewebsites.net/");
         }
         else
         {
             Debug.Log("Invalid score. No Score saved.");
         }
-
-        var highScore = new HighScore
-        {
-            Name = initials,
-            Score = Convert.ToDouble(averageTime),
-            DateCreated = DateTime.UtcNow,
-            AppName = "PoReflexSquares"
-            // Set other properties as needed
-        };
-
-        await PostHighScoreAsync(highScore, "https://poshared.azurewebsites.net/");
 
         gameOverModal.SetActive(false);
         ResetGame();
