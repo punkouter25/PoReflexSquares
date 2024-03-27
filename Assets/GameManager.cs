@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public Button startButton; // Reference to the Start button
     public Text countdownTimerText; // For countdown display
     public InputField initialsInputField;
+    public HighScoreManager highScoreManager;
 
     private bool gameIsActive = false;
     private int currentIndex = -1;
@@ -264,6 +265,11 @@ public class GameManager : MonoBehaviour
             };
 
             await PostHighScoreAsync(highScore, "https://poshared.azurewebsites.net/");
+            // After posting the score, reload the high scores
+            if(highScoreManager != null)
+            {
+                highScoreManager.StartCoroutine(highScoreManager.FetchHighScores());
+            }
         }
         else
         {

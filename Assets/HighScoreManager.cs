@@ -19,7 +19,7 @@ public class HighScoreManager : MonoBehaviour
     }
 
     [System.Obsolete]
-    private IEnumerator FetchHighScores()
+    public IEnumerator FetchHighScores()
     {
         using UnityWebRequest webRequest = UnityWebRequest.Get(apiUrl);
         // Request and wait for the desired page.
