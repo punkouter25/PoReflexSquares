@@ -42,7 +42,7 @@ public class HighScoreManager : MonoBehaviour
 
         if (highScores != null && highScores.Count > 0)
         {
-            highScores = highScores.OrderBy(hs => hs.Score).Take(5).ToList();
+            highScores = highScores.OrderBy(hs => hs.Score).Take(10).ToList();
 
             for (int i = 0; i < highScoreTexts.Count && i < highScores.Count; i++)
             {
