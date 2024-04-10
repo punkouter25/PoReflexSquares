@@ -197,7 +197,7 @@ public class GameManager : MonoBehaviour
             validScore = true;
             // Calculate and display the average reaction time if the game ended normally.
             averageTime = CalculateAverageTime();
-            scoreText.text = $"Average Reaction Time: {averageTime:F2} ms";
+            scoreText.text = $"Score: {averageTime:F2} ms";
             initialsInputField.gameObject.SetActive(true); // Ensure the input field is visible for valid game overs
         }
 
