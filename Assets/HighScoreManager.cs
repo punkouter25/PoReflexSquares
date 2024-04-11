@@ -22,7 +22,6 @@ public class HighScoreManager : MonoBehaviour
     public IEnumerator FetchHighScores()
     {
         using UnityWebRequest webRequest = UnityWebRequest.Get(apiUrl);
-        // Request and wait for the desired page.
         yield return webRequest.SendWebRequest();
 
         if (webRequest.isNetworkError)
@@ -49,8 +48,6 @@ public class HighScoreManager : MonoBehaviour
                 highScoreTexts[i].text = $"{i + 1}. {highScores[i].Name} - {(int)highScores[i].Score}";
             }
         }
-
-
     }
 
     // Wrapper class for deserialization

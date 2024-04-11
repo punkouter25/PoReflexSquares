@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour
     public Text countdownTimerText; // For countdown display
     public InputField initialsInputField;
     public HighScoreManager highScoreManager;
+    //public HighScoreManagerCloud highScoreManager;
+
 
     private bool gameIsActive = false;
     private int currentIndex = -1;
@@ -85,8 +87,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator DelaySquareActivation(GameObject square)
     {
-         // float delay = UnityEngine.Random.Range(0.0f, 0.1f);
-          float delay = UnityEngine.Random.Range(0.5f, 1.5f);
+        // float delay = UnityEngine.Random.Range(0.0f, 0.1f);
+        float delay = UnityEngine.Random.Range(0.5f, 1.5f);
 
         yield return new WaitForSeconds(delay);
 
@@ -168,7 +170,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void EndGame(bool earlyTap, bool failed)
+    private void EndGame(bool earlyTap, bool failed)
     {
         Debug.Log("EndGame");
         // Stop the game activity.
@@ -194,8 +196,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            validScore = true;
             // Calculate and display the average reaction time if the game ended normally.
+            validScore = true;
             averageTime = CalculateAverageTime();
             scoreText.text = $"Score: {averageTime:F2} ms";
             initialsInputField.gameObject.SetActive(true); // Ensure the input field is visible for valid game overs
@@ -214,14 +216,16 @@ public class GameManager : MonoBehaviour
         tapTimes.Clear();
     }
 
-
-
     private float CalculateAverageTime()
     {
-        if (tapTimes.Count == 0)
+        if (tapTimes.Count <= 2)
         {
-            return 0f;
+            return 0f; // Not enough data to remove best and worst scores
         }
+
+        tapTimes.Sort();
+        tapTimes.RemoveAt(0); // Remove the best time
+        tapTimes.RemoveAt(tapTimes.Count - 1); // Remove the worst time
 
         float total = 0f;
         foreach (float time in tapTimes)
@@ -239,11 +243,13 @@ public class GameManager : MonoBehaviour
         InitializeGame(); // Reset and prepare for a new game
     }
 
+    [Obsolete]
     public void OnSubmitScoreClicked()
     {
         _ = SubmitScoreAsync(); // Discard the task
     }
 
+    [Obsolete]
     public async Task SubmitScoreAsync()
     {
         Debug.Log("Submit Score");
@@ -255,20 +261,20 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Initials: " + initials + " Score: " + averageTime);
 
-            var highScore = new HighScore
+            HighScore highScore = new()
             {
                 Name = initials,
                 Score = Convert.ToDouble(averageTime),
                 DateCreated = DateTime.UtcNow,
                 AppName = "PoReflexSquares"
-                // Set other properties as needed
             };
 
             await PostHighScoreAsync(highScore, "https://poshared.azurewebsites.net/");
             // After posting the score, reload the high scores
-            if(highScoreManager != null)
+            if (highScoreManager != null)
             {
-                highScoreManager.StartCoroutine(highScoreManager.FetchHighScores());
+                _ = highScoreManager.StartCoroutine(highScoreManager.FetchHighScores());
+              //highScoreManager.AddScore(averageTime);
             }
         }
         else
@@ -284,21 +290,19 @@ public class GameManager : MonoBehaviour
     {
         try
         {
-            using (var client = new HttpClient())
+            using HttpClient client = new();
+            string json = JsonUtility.ToJson(highScore);
+            StringContent content = new(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PostAsync($"{apiUrl}/highscores", content);
+
+            if (response.IsSuccessStatusCode)
             {
-                string json = JsonUtility.ToJson(highScore);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await client.PostAsync($"{apiUrl}/highscores", content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    Debug.Log("High score posted successfully.");
-                }
-                else
-                {
-                    Debug.Log($"Failed to post high score. Status code: {response.StatusCode}");
-                }
+                Debug.Log("High score posted successfully.");
+            }
+            else
+            {
+                Debug.Log($"Failed to post high score. Status code: {response.StatusCode}");
             }
         }
         catch (Exception ex)
