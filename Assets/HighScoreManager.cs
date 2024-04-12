@@ -45,7 +45,7 @@ public class HighScoreManager : MonoBehaviour
 
             for (int i = 0; i < highScoreTexts.Count && i < highScores.Count; i++)
             {
-                highScoreTexts[i].text = $"{i + 1}. {highScores[i].Name} - {(int)highScores[i].Score}";
+                highScoreTexts[i].text = $"{i + 1}. {highScores[i].Name} - {(int)highScores[i].Score} ({highScores[i].DateCreated.ToString("MM/dd/yy")})";
             }
         }
     }

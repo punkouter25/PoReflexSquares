@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
 
     private void InitializeGame()
     {
+        ForceUppercaseInput(); // Ensure initials are always in uppercase
         gameIsActive = false;
         currentIndex = -1;
         tapTimes.Clear();
@@ -309,5 +310,11 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log($"An error occurred while posting the high score: {ex.Message}");
         }
+    }
+
+    // Add this method to the GameManager class
+    public void ForceUppercaseInput()
+    {
+        initialsInputField.onValueChanged.AddListener(delegate {initialsInputField.text = initialsInputField.text.ToUpper();});
     }
 }
