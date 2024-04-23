@@ -19,17 +19,26 @@ public class HighScoreManager : MonoBehaviour
     }
 
     [System.Obsolete]
+    /// <summary>
+    /// Coroutine to fetch high scores from the server using an HTTP GET request.
+    /// </summary>
+    /// <returns>An IEnumerator for coroutine compatibility.</returns>
     public IEnumerator FetchHighScores()
     {
+        // Create a GET request using the API URL
         using UnityWebRequest webRequest = UnityWebRequest.Get(apiUrl);
+        // Send the request and wait for the response
         yield return webRequest.SendWebRequest();
 
+        // Check for network errors
         if (webRequest.isNetworkError)
         {
+            // Log error to the console
             Debug.LogError("Error: " + webRequest.error);
         }
         else
         {
+            // Process the JSON data received from the server
             ProcessHighScores(webRequest.downloadHandler.text);
         }
     }

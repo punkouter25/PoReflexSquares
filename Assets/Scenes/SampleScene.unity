@@ -817,6 +817,7 @@ MonoBehaviour:
   gameOverModal: {fileID: 1801236657}
   scoreText: {fileID: 1208229630}
   startButton: {fileID: 1605064213}
+  scoreButton: {fileID: 1957106176}
   countdownTimerText: {fileID: 1461816913}
   initialsInputField: {fileID: 2129442148}
   highScoreManager: {fileID: 986793319}
