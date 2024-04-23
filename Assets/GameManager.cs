@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public GameObject gameOverModal;
     public Text scoreText;
     public Button startButton; // Reference to the Start button
+    public Button scoreButton;
     public Text countdownTimerText; // For countdown display
     public InputField initialsInputField;
     public HighScoreManager highScoreManager;
@@ -189,11 +190,13 @@ public class GameManager : MonoBehaviour
             // Early tap or tap on an inactive square means no score.
             scoreText.text = "GAME OVER: You tapped too soon!";
             initialsInputField.gameObject.SetActive(false); // Hide the input field on early tap
+            scoreButton.GetComponentInChildren<Text>().text = "OK";
         }
         else if (failed)
         {
             scoreText.text = "GAME OVER: Time's up!";
             initialsInputField.gameObject.SetActive(false); // Show the input field for other failures
+            scoreButton.GetComponentInChildren<Text>().text = "OK";
         }
         else
         {
@@ -202,6 +205,7 @@ public class GameManager : MonoBehaviour
             averageTime = CalculateAverageTime();
             scoreText.text = $"Score: {averageTime:F2} ms";
             initialsInputField.gameObject.SetActive(true); // Ensure the input field is visible for valid game overs
+            scoreButton.GetComponentInChildren<Text>().text = "SUBMIT SCORE";
         }
 
         // Clear the countdown timer text.
